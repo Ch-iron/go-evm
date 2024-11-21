@@ -42,6 +42,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// If you use snapshot, you may need to manipulate this value
 // TriesInMemory represents the number of layers that are kept in RAM.
 const TriesInMemory = 128
 

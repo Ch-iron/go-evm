@@ -18,10 +18,13 @@ package runtime
 
 import (
 	"github.com/Ch-iron/go-evm/core"
+	"github.com/Ch-iron/go-evm/state"
 	"github.com/Ch-iron/go-evm/vm"
 )
 
-func NewEnv(cfg *Config) *vm.EVM {
+// Change Point
+// NewEnv(cfg *Config) -> NewEnv(cfg *Config, statedb *state.StateDB)
+func NewEnv(cfg *Config, statedb *state.StateDB) *vm.EVM {
 	txContext := vm.TxContext{
 		Origin:     cfg.Origin,
 		GasPrice:   cfg.GasPrice,
@@ -42,7 +45,7 @@ func NewEnv(cfg *Config) *vm.EVM {
 		Random:      cfg.Random,
 	}
 
-	evm := vm.NewEVM(blockContext, cfg.State, cfg.ChainConfig, cfg.EVMConfig)
+	evm := vm.NewEVM(blockContext, statedb, cfg.ChainConfig, cfg.EVMConfig)
 	evm.SetTxContext(txContext)
 	return evm
 }
