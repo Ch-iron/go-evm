@@ -27,6 +27,7 @@ import (
 	"github.com/holiman/uint256"
 )
 
+// In order to use the latest opcodes, blocks after the Ethereum Shanghai update need to be set up in the EVM.
 const SHANGHAI_BLOCK_COUNT = 16830000
 
 func loadBin(filename string) []byte {
@@ -92,7 +93,6 @@ func main() {
 	for i := 0; i < len(addrArrayString); i++ {
 		stringtoaddress := common.HexToAddress(addrArrayString[i])
 		addrArray = append(addrArray, stringtoaddress)
-		// fmt.Println(addr_array[i])
 	}
 
 	logFile, _ := os.Create("log.txt")
@@ -122,7 +122,7 @@ func main() {
 	// memdb := rawdb.NewMemoryDatabase()
 	// pebbledb, _ := rawdb.NewPebbleDBDatabase("../pebbledb", 128, 1024, "", false)
 
-	// Set State
+	// Create State
 	tdb := triedb.NewDatabase(leveldb, triedbConfig)
 	snaps, _ := snapshot.New(snapconfig, leveldb, tdb, types.EmptyRootHash)
 	statedb := state.NewDatabase(tdb, snaps) // If you don't use snapshot, snaps is null
@@ -153,7 +153,7 @@ func main() {
 	// Deposit Contract Deploy
 	sender := vm.AccountRef(testAddress)
 
-	_, contractAddress, leftOverGas, err := evm.Create(
+	_, contractAddress, gasleftover, err := evm.Create(
 		sender,
 		data,
 		globalstate.GetBalance(testAddress).Uint64(),
@@ -162,10 +162,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	globalstate.SetBalance(testAddress, uint256.NewInt(leftOverGas), tracing.BalanceChangeUnspecified)
+	globalstate.SetBalance(testAddress, uint256.NewInt(gasleftover), tracing.BalanceChangeUnspecified)
 
 	// Modified State commit into disk
-	root, _ := globalstate.Commit(0, true)
+	root, _ := globalstate.Commit(0, true, 128)
 	if err := tdb.Commit(root, false); err != nil {
 		panic(err)
 	}
@@ -192,7 +192,7 @@ func main() {
 		account := addrArray[i]
 		sender := vm.AccountRef(account)
 
-		_, leftOverGas, err = evm.Call(
+		_, gasleftover, err = evm.Call(
 			sender,
 			contractAddress,
 			input,
@@ -202,11 +202,11 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		globalstate.SetBalance(addrArray[i], uint256.NewInt(leftOverGas-uint64(1e18-100000)), tracing.BalanceChangeUnspecified)
+		globalstate.SetBalance(addrArray[i], uint256.NewInt(gasleftover-uint64(1e18-100000)), tracing.BalanceChangeUnspecified)
 	}
 
 	// Modified State commit into disk
-	root, _ = globalstate.Commit(0, true)
+	root, _ = globalstate.Commit(0, true, 128)
 	if err := tdb.Commit(root, false); err != nil {
 		panic(err)
 	}

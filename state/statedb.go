@@ -1249,7 +1249,7 @@ func (s *StateDB) commit(deleteEmptyObjects bool) (*stateUpdate, error) {
 
 // commitAndFlush is a wrapper of commit which also commits the state mutations
 // to the configured data stores.
-func (s *StateDB) commitAndFlush(block uint64, deleteEmptyObjects bool) (*stateUpdate, error) {
+func (s *StateDB) commitAndFlush(block uint64, deleteEmptyObjects bool, triesInMemory int) (*stateUpdate, error) {
 	ret, err := s.commit(deleteEmptyObjects)
 	if err != nil {
 		return nil, err
@@ -1275,8 +1275,8 @@ func (s *StateDB) commitAndFlush(block uint64, deleteEmptyObjects bool) (*stateU
 			// - head layer is paired with HEAD state
 			// - head-1 layer is paired with HEAD-1 state
 			// - head-127 layer(bottom-most diff layer) is paired with HEAD-127 state
-			if err := snap.Cap(ret.root, TriesInMemory); err != nil {
-				log.Warn("Failed to cap snapshot tree", "root", ret.root, "layers", TriesInMemory, "err", err)
+			if err := snap.Cap(ret.root, triesInMemory); err != nil {
+				log.Warn("Failed to cap snapshot tree", "root", ret.root, "layers", triesInMemory, "err", err)
 			}
 			s.SnapshotCommits += time.Since(start)
 		}
@@ -1302,8 +1302,8 @@ func (s *StateDB) commitAndFlush(block uint64, deleteEmptyObjects bool) (*stateU
 //
 // The associated block number of the state transition is also provided
 // for more chain context.
-func (s *StateDB) Commit(block uint64, deleteEmptyObjects bool) (common.Hash, error) {
-	ret, err := s.commitAndFlush(block, deleteEmptyObjects)
+func (s *StateDB) Commit(block uint64, deleteEmptyObjects bool, triesInMemory int) (common.Hash, error) {
+	ret, err := s.commitAndFlush(block, deleteEmptyObjects, triesInMemory)
 	if err != nil {
 		return common.Hash{}, err
 	}
