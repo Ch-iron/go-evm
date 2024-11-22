@@ -159,4 +159,4 @@ Otherwise, you'll need to adjust the value of layer_num, which determines how ma
 
 ### 4. EVM Parallel Execution  
 If you want to run EVM in parallel, you can implement it as shown below. Using state.Copy( )  
-![](./example/transaction_parallel_execution.png)
+![](./transaction_parallel_execution.png)
