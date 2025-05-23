@@ -1,6 +1,6 @@
-# Go-EVM
+# go-evm
 
-This repository is a module extracted from [go-ethereum (geth)](https://geth.ethereum.org/) Ver. 1.14 and made available to EVM only.  
+This repository is a Go implementation of Ethereum Virtual Machine (EVM) extracted from [go-ethereum (geth)](https://geth.ethereum.org/) Ver. 1.14 and made available to EVM only.  
 This EVM doesn't test EOF(Ethereum Object Format)
 
 ## Table of Contents
